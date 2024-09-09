@@ -11,4 +11,7 @@ fn main() {
     let (x,y,z) = tup;
 
     println!("Value of 2nds index {y}");
+
+    let mut str = String::from("Hello");
+    str.push_str(" World");
 }

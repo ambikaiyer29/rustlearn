@@ -215,8 +215,8 @@ fn main() {
 }
 ```
 
-### Ownership
-* Ownership is Rust’s most unique feature and has deep implications for the rest of the language. It enables Rust to make memory safety guarantees without needing a garbage collector, so it’s important to understand how ownership works.
+### Chapter 4 - Ownership
+* Ownership is Rust’s unique feature and has deep implications for the rest of the language. It enables Rust to make memory safety guarantees without needing a garbage collector, so it’s important to understand how ownership works.
 * Ownership is a set of rules that govern how a Rust program manages memory. All programs have to manage the way they use a computer’s memory while running. Some languages have garbage collection that regularly looks for no-longer-used memory as the program runs; in other languages, the programmer must explicitly allocate and free the memory. Rust uses a third approach: memory is managed through a system of ownership with a set of rules that the compiler checks. If any of the rules are violated, the program won’t compile. None of the features of ownership will slow down your program while it’s running.
 * You must know whether the value is on the heap or the stack to understand the ownership rules further. The stack is well organized and used to store values of known, fixed size - always follows FIFO. Heap is less organized and you can ask the memory allocator to find a space in heap big enough for your needs and it returns a pointer to that location. This pointer is a known & fixed size and pointer itself could be stored in a stack. but the actual data would be on the heap.
 * Pushing to the stack is faster than allocating on the heap because the allocator never has to search for a place to store new data; that location is always at the top of the stack. Comparatively, allocating space on the heap requires more work because the allocator must first find a big enough space to hold the data and then perform bookkeeping to prepare for the next allocation. Read full details [here](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#the-stack-and-the-heap)
@@ -227,3 +227,95 @@ fn main() {
 - There can only be one owner at a time.
 - When the owner goes out of scope, the value will be dropped.
 ```
+* Ownership can be explained with complex data type like `String` . With the String type, in order to support a mutable, growable piece of text, we need to allocate an amount of memory on the heap, unknown at compile time, to hold the contents. This means:
+  * The memory must be requested from the memory allocator at runtime. 
+  * We  need a way of returning this memory to the allocator when we’re done with our String.
+* The first step is similar in most programming languages. However, the second part is different. In languages with a garbage collector (GC), the GC keeps track of and cleans up memory that isn’t being used anymore, and we don’t need to think about it. In most languages without a GC, it’s our responsibility to identify when memory is no longer being used and to call code to explicitly free it, just as we did to request it. Doing this correctly has historically been a difficult programming problem. If we forget, we’ll waste memory. If we do it too early, we’ll have an invalid variable. If we do it twice, that’s a bug too. We need to pair exactly one allocate with exactly one free. 
+* Rust takes a different path: the memory is automatically returned once the variable that owns it goes out of scope. Ex:
+```rust
+fn main() {
+    {
+        let s = String::from("hello"); // s is valid from this point forward
+
+        // do stuff with s
+    }                                  // this scope is now over, and s is no
+                                       // longer valid
+}
+```
+* When a variable goes out of scope, Rust calls a special function for us. This function is called drop, and it’s where the author of String can put the code to return the memory. Rust calls drop automatically at the closing curly bracket.
+* Read this section in the book for more details with example on [scope and memory deallocation](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#variables-and-data-interacting-with-move). It is explained with pictures and examples for better understanding.
+* What we call as _shallow copy_ in other languages, is called as _move_ in Rust. The data is moved to the new variable and the old variable is invalidated. This is done to prevent double f ree error. If you try to use an invalidated variable, you will get a compile time error. Example:
+```rust
+fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1;
+
+    println!("{s1}, world!"); // throws compilation error[E0382]: borrow of moved value: `s1`
+}
+``` 
+* There is a slight difference when using stack only data types like integers. They are copied instead of moved. They are copied because they are simple fixed size data types and the copy operation is fast. Rust has a special trait called `Copy` which is used to copy the data instead of moving it. If a type has the `Copy` trait, an older variable is still usable after assignment. Example:
+```rust
+fn main() {
+    let x = 5;
+    let y = x;
+
+    println!("x = {x}, y = {y}");
+}
+``` 
+* Passing a variable to a function will move or copy, just as assignment does. 
+* If you do not want to transfer ownership on function call, you can use the `&` operator to pass a reference. This is called as _borrowing_. Just as variables are immutable by default, so are references. We’re not allowed to modify something we have a reference to. So you cannot modify the value of `s` in this example. Example:
+```rust
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+```
+* Mutable references have one big restriction: if you have a mutable reference to a value, you can have no other references to that value. This code that attempts to create two mutable references to `s` will fail:
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &mut s;
+    let r2 = &mut s;
+
+    println!("{}, {}", r1, r2);
+}
+```
+* This restriction is put in place in order to avoid race conditions on the data at compile time. This is one of the key features of Rust that makes it safe and easy to use.
+* We can use curly brackets to create a new scope, allowing for multiple mutable references, just not simultaneous ones:
+```rust
+fn main() {
+  let mut s = String::from("hello");
+  {
+    let r1 = &mut s;
+  } // r1 goes out of scope here, so we can make a new reference with no problems.
+
+  let r2 = &mut s;
+}
+```
+* We also cannot have a mutable reference while we have an immutable one to the same value. This is because when you have an immutable reference, you could be changing the value of the variable through the mutable reference, which would violate the rules of borrowing. Example:
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &s; // no problem
+    let r2 = &s; // no problem
+    let r3 = &mut s; // BIG PROBLEM
+
+    println!("{}, {}, and {}", r1, r2, r3);
+}
+```
+* However the following will compile since the mutable reference is not used after the immutable reference is created. The scopes of the immutable references r1 and r2 end after the println! where they are last used, which is before the mutable reference r3 is created.
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &s; // no problem
+    let r2 = &s; // no problem
+    println!("{r1} and {r2}");
+    // variables r1 and r2 will not be used after this point
+
+    let r3 = &mut s; // no problem
+    println!("{r3}");
+}
+```
+* See the example [here](https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html#dangling-references) to understand the concept of _dangling references_ and how Rust prevents it. 
