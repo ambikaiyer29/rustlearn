@@ -319,3 +319,71 @@ fn main() {
 }
 ```
 * See the example [here](https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html#dangling-references) to understand the concept of _dangling references_ and how Rust prevents it. 
+
+### Chapter 5 - Structs
+* Structs are like tuples but with named fields. They are useful when you want to give a name to each piece of data and make your code more readable.
+  * Some Rust specific struct features are :
+    * You can use field init shorthand to initialize struct fields with variables of the same name.
+    ```rust
+      fn build_user(email: String, username: String) -> User {
+      User {
+          active: true,
+          username: username,
+          email: email,
+          sign_in_count: 1,
+      }
+    }
+      // same as the following
+      
+      fn build_user(email: String, username: String) -> User {
+      User {
+          active: true,
+          username,
+          email,
+          sign_in_count: 1,
+      }
+    }    
+  
+* Struct update syntax allows you to create new instances of a struct that use some of the fields of a previous instance, like so:
+```rust
+fn main() {
+    // --snip--
+
+    let user2 = User {
+        active: user1.active,
+        username: user1.username,
+        email: String::from("another@example.com"),
+        sign_in_count: user1.sign_in_count,
+    };
+}
+fn main() {
+  // --snip--
+
+  let user2 = User {
+    email: String::from("another@example.com"),
+    ..user1 // update syntax
+  };
+}
+```
+* Note that the struct update syntax uses = like an assignment.we can no longer use user1 as a whole after creating user2 because the String in the username field of user1 was moved into user2. If we had given user2 new String values for both email and username, and thus only used the active and sign_in_count values from user1, then user1 would still be valid after creating user2. Both active and sign_in_count are types that implement the Copy trait, so the behavior we discussed in the “Stack-Only Data: Copy” section would apply
+* Tuple structs are a way to give a tuple a name and to make the tuple be a different type from other tuples, and the struct part of the name comes from the fact that structs can also have named fields. Tuple structs are useful when you want to give the whole tuple a name and make the tuple be a different type from other tuples, and naming each field as in a regular struct would be verbose or redundant.
+```rust
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+fn main() {
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+}
+```
+* Unit-like structs dont have any fields;
+```rust
+struct AlwaysEqual; // unit-like struct
+
+fn main() {
+  let subject = AlwaysEqual;
+}
+```
+
+* See interesting examples of adding traits to structs [here](https://doc.rust-lang.org/book/ch05-02-example-structs.html#adding-useful-functionality-with-derived-traits)
+* 
