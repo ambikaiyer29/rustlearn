@@ -30,7 +30,7 @@
     }
 ```
 * Additionally, the u32 annotation in this example program and the comparison with secret_number means Rust will infer that secret_number should be a u32 as well. So now the comparison will be between two values of the same type!
-* The underscore, `_`, is a catchall value; in this example, we’re saying we want to match all Err values, no matter what information they have inside them. 
+* The underscore, `_`, is a catchall value; in this example, we’re saying we want to match all Err values, no matter what information they have inside them.
 ```aiignore
  let guess: u32 = match guess.trim().parse() {
             Ok(num) => num,
@@ -56,7 +56,7 @@ fn main() {
 ```aiignore
 const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
 ```
-* _Shadowing_ : This is used to declare a new variable with the same name.(This is similar to conceptually to RDDs that we see in Spark). Example - 
+* _Shadowing_ : This is used to declare a new variable with the same name.(This is similar to conceptually to RDDs that we see in Spark). Example -
 ```aiignore
 fn main() {
     let x = 5;
@@ -78,7 +78,7 @@ let spaces = spaces.len();
 * Rus has two subsets of data types - scalar and compound data types.
 * When compiling Rust code in debug mode, it checks for integer overflows , but in release it wont and just wrap the value which can result in unexpected behaviour.
 * Rust has two floating point types : `f32` and `f64` . Default is f64 which is capable of more precision.
-* Rust’s char type is four bytes in size and represents a Unicode Scalar Value, which means it can represent a lot more than just ASCII. Accented letters; Chinese, Japanese, and Korean characters; emoji; and zero-width spaces are all valid char values in Rust. 
+* Rust’s char type is four bytes in size and represents a Unicode Scalar Value, which means it can represent a lot more than just ASCII. Accented letters; Chinese, Japanese, and Korean characters; emoji; and zero-width spaces are all valid char values in Rust.
 * Compound types can group multiple values into one type. Rust has two primitive compound types: tuples and arrays.
 * A tuple is a general way of grouping together a number of values with a variety of types into one compound type. Tuples have a fixed length: once declared, they cannot grow or shrink in size.
   ```aiignore
@@ -128,7 +128,7 @@ fn plus_one(x: int32) -> i32 {
 ```
 #### Control Flow
 * `if` and `loops` are the common constructs to control the flow of you code execution in Rust.
-* Blocks of code associated with the conditions in if expressions are sometimes called arms, just like the arms in match expressions. Example : 
+* Blocks of code associated with the conditions in if expressions are sometimes called arms, just like the arms in match expressions. Example :
 ```aiignore
 fn main() {
     let number = 3;
@@ -157,7 +157,7 @@ fn main() {
     }
 }
 ```
-* You can return values from a loop. Ex : 
+* You can return values from a loop. Ex :
 ```aiignore
 fn main() {
     let mut counter = 0;
@@ -173,7 +173,7 @@ fn main() {
     println!("The result is {result}");
 }
 ```
-* Loop labels allow to disambiguate within nested loops. The label starts with a single quote. It can be used with break or continue to specific which loop this applies to. By default, it would apply to the innermost loop at that point. See Example : 
+* Loop labels allow to disambiguate within nested loops. The label starts with a single quote. It can be used with break or continue to specific which loop this applies to. By default, it would apply to the innermost loop at that point. See Example :
 ```aiignore
 fn main() {
     let mut count = 0;
@@ -228,18 +228,18 @@ fn main() {
 - When the owner goes out of scope, the value will be dropped.
 ```
 * Ownership can be explained with complex data type like `String` . With the String type, in order to support a mutable, growable piece of text, we need to allocate an amount of memory on the heap, unknown at compile time, to hold the contents. This means:
-  * The memory must be requested from the memory allocator at runtime. 
+  * The memory must be requested from the memory allocator at runtime.
   * We  need a way of returning this memory to the allocator when we’re done with our String.
-* The first step is similar in most programming languages. However, the second part is different. In languages with a garbage collector (GC), the GC keeps track of and cleans up memory that isn’t being used anymore, and we don’t need to think about it. In most languages without a GC, it’s our responsibility to identify when memory is no longer being used and to call code to explicitly free it, just as we did to request it. Doing this correctly has historically been a difficult programming problem. If we forget, we’ll waste memory. If we do it too early, we’ll have an invalid variable. If we do it twice, that’s a bug too. We need to pair exactly one allocate with exactly one free. 
+* The first step is similar in most programming languages. However, the second part is different. In languages with a garbage collector (GC), the GC keeps track of and cleans up memory that isn’t being used anymore, and we don’t need to think about it. In most languages without a GC, it’s our responsibility to identify when memory is no longer being used and to call code to explicitly free it, just as we did to request it. Doing this correctly has historically been a difficult programming problem. If we forget, we’ll waste memory. If we do it too early, we’ll have an invalid variable. If we do it twice, that’s a bug too. We need to pair exactly one allocate with exactly one free.
 * Rust takes a different path: the memory is automatically returned once the variable that owns it goes out of scope. Ex:
 ```rust
 fn main() {
-    {
-        let s = String::from("hello"); // s is valid from this point forward
+  {
+    let s = String::from("hello"); // s is valid from this point forward
 
-        // do stuff with s
-    }                                  // this scope is now over, and s is no
-                                       // longer valid
+    // do stuff with s
+  }                                  // this scope is now over, and s is no
+  // longer valid
 }
 ```
 * When a variable goes out of scope, Rust calls a special function for us. This function is called drop, and it’s where the author of String can put the code to return the memory. Rust calls drop automatically at the closing curly bracket.
@@ -247,37 +247,37 @@ fn main() {
 * What we call as _shallow copy_ in other languages, is called as _move_ in Rust. The data is moved to the new variable and the old variable is invalidated. This is done to prevent double f ree error. If you try to use an invalidated variable, you will get a compile time error. Example:
 ```rust
 fn main() {
-    let s1 = String::from("hello");
-    let s2 = s1;
+  let s1 = String::from("hello");
+  let s2 = s1;
 
-    println!("{s1}, world!"); // throws compilation error[E0382]: borrow of moved value: `s1`
+  println!("{s1}, world!"); // throws compilation error[E0382]: borrow of moved value: `s1`
 }
 ``` 
 * There is a slight difference when using stack only data types like integers. They are copied instead of moved. They are copied because they are simple fixed size data types and the copy operation is fast. Rust has a special trait called `Copy` which is used to copy the data instead of moving it. If a type has the `Copy` trait, an older variable is still usable after assignment. Example:
 ```rust
 fn main() {
-    let x = 5;
-    let y = x;
+  let x = 5;
+  let y = x;
 
-    println!("x = {x}, y = {y}");
+  println!("x = {x}, y = {y}");
 }
 ``` 
-* Passing a variable to a function will move or copy, just as assignment does. 
+* Passing a variable to a function will move or copy, just as assignment does.
 * If you do not want to transfer ownership on function call, you can use the `&` operator to pass a reference. This is called as _borrowing_. Just as variables are immutable by default, so are references. We’re not allowed to modify something we have a reference to. So you cannot modify the value of `s` in this example. Example:
 ```rust
 fn calculate_length(s: &String) -> usize {
-    s.len()
+  s.len()
 }
 ```
 * Mutable references have one big restriction: if you have a mutable reference to a value, you can have no other references to that value. This code that attempts to create two mutable references to `s` will fail:
 ```rust
 fn main() {
-    let mut s = String::from("hello");
+  let mut s = String::from("hello");
 
-    let r1 = &mut s;
-    let r2 = &mut s;
+  let r1 = &mut s;
+  let r2 = &mut s;
 
-    println!("{}, {}", r1, r2);
+  println!("{}, {}", r1, r2);
 }
 ```
 * This restriction is put in place in order to avoid race conditions on the data at compile time. This is one of the key features of Rust that makes it safe and easy to use.
@@ -295,30 +295,30 @@ fn main() {
 * We also cannot have a mutable reference while we have an immutable one to the same value. This is because when you have an immutable reference, you could be changing the value of the variable through the mutable reference, which would violate the rules of borrowing. Example:
 ```rust
 fn main() {
-    let mut s = String::from("hello");
+  let mut s = String::from("hello");
 
-    let r1 = &s; // no problem
-    let r2 = &s; // no problem
-    let r3 = &mut s; // BIG PROBLEM
+  let r1 = &s; // no problem
+  let r2 = &s; // no problem
+  let r3 = &mut s; // BIG PROBLEM
 
-    println!("{}, {}, and {}", r1, r2, r3);
+  println!("{}, {}, and {}", r1, r2, r3);
 }
 ```
 * However the following will compile since the mutable reference is not used after the immutable reference is created. The scopes of the immutable references r1 and r2 end after the println! where they are last used, which is before the mutable reference r3 is created.
 ```rust
 fn main() {
-    let mut s = String::from("hello");
+  let mut s = String::from("hello");
 
-    let r1 = &s; // no problem
-    let r2 = &s; // no problem
-    println!("{r1} and {r2}");
-    // variables r1 and r2 will not be used after this point
+  let r1 = &s; // no problem
+  let r2 = &s; // no problem
+  println!("{r1} and {r2}");
+  // variables r1 and r2 will not be used after this point
 
-    let r3 = &mut s; // no problem
-    println!("{r3}");
+  let r3 = &mut s; // no problem
+  println!("{r3}");
 }
 ```
-* See the example [here](https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html#dangling-references) to understand the concept of _dangling references_ and how Rust prevents it. 
+* See the example [here](https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html#dangling-references) to understand the concept of _dangling references_ and how Rust prevents it.
 
 ### Chapter 5 - Structs
 * Structs are like tuples but with named fields. They are useful when you want to give a name to each piece of data and make your code more readable.
@@ -343,18 +343,18 @@ fn main() {
           sign_in_count: 1,
       }
     }    
-  
+
 * Struct update syntax allows you to create new instances of a struct that use some of the fields of a previous instance, like so:
 ```rust
 fn main() {
-    // --snip--
+  // --snip--
 
-    let user2 = User {
-        active: user1.active,
-        username: user1.username,
-        email: String::from("another@example.com"),
-        sign_in_count: user1.sign_in_count,
-    };
+  let user2 = User {
+    active: user1.active,
+    username: user1.username,
+    email: String::from("another@example.com"),
+    sign_in_count: user1.sign_in_count,
+  };
 }
 fn main() {
   // --snip--
@@ -372,8 +372,8 @@ struct Color(i32, i32, i32);
 struct Point(i32, i32, i32);
 
 fn main() {
-    let black = Color(0, 0, 0);
-    let origin = Point(0, 0, 0);
+  let black = Color(0, 0, 0);
+  let origin = Point(0, 0, 0);
 }
 ```
 * Unit-like structs dont have any fields;
@@ -386,4 +386,152 @@ fn main() {
 ```
 
 * See interesting examples of adding traits to structs [here](https://doc.rust-lang.org/book/ch05-02-example-structs.html#adding-useful-functionality-with-derived-traits)
-* 
+
+### Chapter 6 - Enums and Pattern Matching
+* In Rust, enum can hold data as well. you do not need to wrap it in a struct with data. Each type can have its own set of values of different types. Example
+```rust
+fn main() {
+  enum IpAddr {
+    V4(u8, u8, u8, u8),
+    V6(String),
+  }
+
+  let home = IpAddr::V4(127, 0, 0, 1);
+
+  let loopback = IpAddr::V6(String::from("::1"));
+}
+
+enum Message {
+  Quit,
+  Move { x: i32, y: i32 },
+  Write(String),
+  ChangeColor(i32, i32, i32),
+}
+
+```
+* enum can have methods defined like structs in rust.Example :
+```rust 
+fn main() {
+  enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+  }
+
+  impl Message {
+    fn call(&self) {
+      // method body would be defined here
+    }
+  }
+
+  let m = Message::Write(String::from("hello"));
+  m.call();
+} 
+```
+* Rust doesn’t have the null feature that many other languages have. It however has an enum _Option_ that can be used.This helps catch one of the most common issues with null: assuming that something isn’t null when it actually is. Definition of Option is
+```rust
+enum Option<T> {
+    None,
+    Some(T),
+}
+
+fn main() {
+  let some_number = Some(5);
+  let some_char = Some('e');
+
+  let absent_number: Option<i32> = None;
+}
+```
+* Rust has a powerful pattern matching control flow construct called _match_. It's similar to switch but more powerful as it can match literal values, variable names, wildcard and many other things. here is an example:
+```rust
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => {
+            println!("Lucky penny!");
+            1
+        }
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter => 25,
+    }
+}
+
+fn main() {}
+```
+* One thing to note, is that the arms of the match must be exhaustive, else it would result in compilation error. There are a couple of ways to do a catch all. One is using _other_ or by using `_`. `other` is used when you need the value that matched, `_` is used when you dont need the matched value. HEre are the examples :
+```rust
+fn main() {
+    let dice_roll = 9;
+    match dice_roll {
+        3 => add_fancy_hat(),
+        7 => remove_fancy_hat(),
+        other => move_player(other),
+    }
+
+    fn add_fancy_hat() {}
+    fn remove_fancy_hat() {}
+    fn move_player(num_spaces: u8) {}
+}
+
+fn main() {
+  let dice_roll = 9;
+  match dice_roll {
+    3 => add_fancy_hat(),
+    7 => remove_fancy_hat(),
+    _ => reroll(),
+  }
+
+  fn add_fancy_hat() {}
+  fn remove_fancy_hat() {}
+  fn reroll() {}
+}
+```
+* There is another syntax called `if let` which is syntactic sugar for some match cases. Example:
+```rust
+#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn main() {
+    let coin = Coin::Penny;
+    let mut count = 0;
+    if let Coin::Quarter(state) = coin {
+        println!("State quarter from {state:?}!");
+    } else {
+        count += 1;
+    }
+}
+
+// this is same as 
+// let mut count = 0;
+// match coin {
+// Coin::Quarter(state) => println!("State quarter from {state:?}!"),
+// _ => count += 1,
+// }
+```
+
+
+### Chapter 7 - Packaging
+Refer this in the book itself. It's a dry topic but you can skim through if you have worked with other package managers.
+
+
+### Other Chapters - TBD.
+### Reading the first 7 chapters was good enough for me to start reading rust code. Rest GPT can help.
